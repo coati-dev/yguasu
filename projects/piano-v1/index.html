@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Piano</title>
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <div id="status">
+          <span id="status-dot"></span>
+          <span id="status-text">No device detected</span>
+        </div>
+
+        <div id="mode-toggle">
+          <button id="toggle-49" type="button">49 keys</button>
+          <button id="toggle-88" type="button">88 keys</button>
+        </div>
+      </header>
+
+      <main>
+        <div id="keyboard-container"></div>
+      </main>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
