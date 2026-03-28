@@ -25,7 +25,7 @@ So *y guasu* literally means **"great water"** or **"big water"** — the origin
 
 Iguaçu is not only famous for its waterfalls — it is also the **natural home of the coati** (*Nasua nasua*).
 
-A **coati** is a social, curious, and highly intelligent mammal native to South and Central America. Related to raccoons, coatis are known for their long, flexible snouts, ringed tails held high in the air, and their tendency to roam in groups called **bands** or **troops**. They are a familiar sight along the trails of Iguaçu National Park, fearlessly exploring their surroundings with boundless energy and adaptability — traits we like to think describe our approach to software too.
+A **coati** is a social, curious, and highly intelligent mammal native to South and Central America. Related to raccoons, coatis are known for their long, flexible snouts, ringed tails held high in the air, and their tendency to roam in groups called **bands** or **troops**. They are a familiar sight along the trails of Iguaçu National Park, fearlessly exploring their surroundings with boundless energy and adaptability.
 
 <p><a href="https://commons.wikimedia.org/wiki/File:Young_Coati.png#/media/File:Young_Coati.png"><img src="https://upload.wikimedia.org/wikipedia/commons/3/39/Young_Coati.png" alt="Young Coati.png" height="1080" width="1620"></a><br>By <a href="//commons.wikimedia.org/wiki/User:Needsmoreritalin" title="User:Needsmoreritalin">Chuck Homler, Focus On Wildlife</a> - <span class="int-own-work" lang="en">Own work</span>, <a href="https://creativecommons.org/licenses/by-sa/4.0" title="Creative Commons Attribution-Share Alike 4.0">CC BY-SA 4.0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=151596700">Link</a></p>
 
