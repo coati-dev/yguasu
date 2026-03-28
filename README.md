@@ -38,7 +38,7 @@ A **coati** is a social, curious, and highly intelligent mammal native to South 
 <sub>Coati at Iguaçu</sub>
 </td>
 <td align="center" width="50%">
-<img src="assets/garganta-rainbow.jpg" alt="Rainbow at Garganta do Diabo — analog photo on Kodak M35"><br>
+<img src="assets/garganta-do-diabo-analog.jpg" alt="Rainbow at Garganta do Diabo — analog photo on Kodak M35"><br>
 <sub>Rainbow at Garganta do Diabo</sub>
 </td>
 </tr>
