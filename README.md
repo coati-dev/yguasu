@@ -1,6 +1,6 @@
 <p><a href="https://commons.wikimedia.org/wiki/File:Iguazu_Cataratas2.jpg#/media/File:Iguazu_Cataratas2.jpg" target="_blank"><img src="assets/iguazu-cataratas.jpg" alt="Iguazu Cataratas" width="100%"></a><br><sub>By <a href="//commons.wikimedia.org/w/index.php?title=User:Enaldo_Valadares&amp;action=edit&amp;redlink=1" target="_blank">Enaldo Valadares</a> - Own work, <a href="https://creativecommons.org/licenses/by-sa/3.0" target="_blank">CC BY-SA 3.0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=32922684" target="_blank">Link</a></sub></p>
 
-> yguasu - Monorepo for all Incubating Projects by [Coati Dev](https://github.com/coati-dev) — the developer mascot of [Timeless Relic](https://timelessrelic.com/).
+yguasu - Monorepo for all Incubating Projects by [Coati](https://github.com/coati-the-dev) — the developer mascot of [Timeless Relic](https://timelessrelic.com/).
 
 ---
 
