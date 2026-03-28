@@ -11,7 +11,7 @@ In the **Guaraní language**, "great water" is translated as:
 > **"y guasu"**
 >
 > - **y** = water
-> - **guasu** = big / great
+> - **guasu** = big / great — and also *deer*
 
 So *y guasu* literally means **"great water"** or **"big water"** — the origin of the name **Iguaçu**, one of the most breathtaking waterfall systems on Earth.
 
