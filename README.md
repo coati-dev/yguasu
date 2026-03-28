@@ -31,6 +31,21 @@ A **coati** is a social, curious, and highly intelligent mammal native to South 
 
 <p><a href="https://commons.wikimedia.org/wiki/File:Coati_Colon.jpg#/media/File:Coati_Colon.jpg"><img src="https://upload.wikimedia.org/wikipedia/commons/8/81/Coati_Colon.jpg" alt="A group of Coatis in Bosque Protector San Lorenzo, Colón, Panamá" height="1080" width="1774"></a><br>By <a href="//commons.wikimedia.org/w/index.php?title=User:BlundiesBestBoots&amp;action=edit&amp;redlink=1" class="new" title="User:BlundiesBestBoots (page does not exist)">BlundiesBestBoots</a> - <span class="int-own-work" lang="en">Own work</span>, <a href="https://creativecommons.org/licenses/by-sa/4.0" title="Creative Commons Attribution-Share Alike 4.0">CC BY-SA 4.0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=168552310">Link</a></p>
 
+<table>
+<tr>
+<td align="center" width="50%">
+<img src="assets/coati-analog.jpg" alt="Coati at Iguaçu — analog photo on Kodak M35"><br>
+<sub>Coati at Iguaçu</sub>
+</td>
+<td align="center" width="50%">
+<img src="assets/garganta-rainbow.jpg" alt="Rainbow at Garganta do Diabo — analog photo on Kodak M35"><br>
+<sub>Rainbow at Garganta do Diabo</sub>
+</td>
+</tr>
+</table>
+
+<sub>Photos by <a href="https://carneiro.pt">@mig4ng</a> · Shot on analog Kodak M35</sub>
+
 ---
 
 ## Meet Coati the Developer
