@@ -1,6 +1,6 @@
 # yguasu
 
-> Monorepo for all Incubating Projects by [Coati Dev](https://github.com/coati-dev) — inspired by the [Cloud Native Computing Foundation (CNCF)](https://www.cncf.io/projects/).
+> Monorepo for all Incubating Projects by [Coati Dev](https://github.com/coati-dev) — the developer mascot of [Timeless Relic](https://timelessrelic.com/).
 
 ---
 
