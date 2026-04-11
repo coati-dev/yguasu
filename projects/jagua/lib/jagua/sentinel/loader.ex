@@ -9,7 +9,11 @@ defmodule Jagua.Sentinel.Loader do
   require Logger
 
   def start_link(_opts) do
-    GenServer.start_link(__MODULE__, [], name: __MODULE__)
+    if Application.get_env(:jagua, :sentinel_loader_enabled, true) do
+      GenServer.start_link(__MODULE__, [], name: __MODULE__)
+    else
+      :ignore
+    end
   end
 
   @impl true

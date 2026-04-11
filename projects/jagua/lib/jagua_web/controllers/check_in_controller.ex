@@ -43,6 +43,8 @@ defmodule JaguaWeb.CheckInController do
   end
 
   defp handle_check_in(conn, sentinel, exit_code, message) do
+    prev_status = sentinel.status
+
     # Record check-in in DB
     Jagua.Sentinels.CheckIn
     |> Ash.Changeset.for_create(:record, %{
@@ -53,9 +55,15 @@ defmodule JaguaWeb.CheckInController do
     |> Ash.create!(domain: Jagua.Sentinels)
 
     # Update sentinel status
-    sentinel
-    |> Ash.Changeset.for_update(:check_in, %{exit_code: exit_code, message: message})
-    |> Ash.update!(domain: Jagua.Sentinels)
+    updated =
+      sentinel
+      |> Ash.Changeset.for_update(:check_in, %{exit_code: exit_code, message: message})
+      |> Ash.update!(domain: Jagua.Sentinels)
+
+    # Fire recovered alert if it was previously failed/errored and is now healthy
+    if prev_status in [:failed, :errored] and updated.status == :healthy do
+      Task.start(fn -> Jagua.Alerts.Dispatcher.dispatch(updated, :recovered) end)
+    end
 
     # Notify the OTP timer so it resets the window
     Jagua.Sentinel.Timer.notify_check_in(sentinel.id)

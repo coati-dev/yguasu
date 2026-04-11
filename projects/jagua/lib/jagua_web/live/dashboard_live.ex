@@ -35,10 +35,20 @@ defmodule JaguaWeb.Live.DashboardLive do
     <div class="max-w-4xl mx-auto px-4 py-8">
       <div class="flex items-center justify-between mb-8">
         <h1 class="text-2xl font-bold text-gray-900">Projects</h1>
-        <.link navigate={~p"/projects/new"}
-          class="bg-gray-900 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-gray-700 transition-colors">
-          New project
-        </.link>
+        <div class="flex items-center gap-3">
+          <.link navigate={~p"/settings"}
+            class="text-sm text-gray-400 hover:text-gray-600">
+            <%= @current_user.email %>
+          </.link>
+          <.link href={~p"/auth/logout"} method="delete"
+            class="text-sm text-gray-400 hover:text-gray-600">
+            Sign out
+          </.link>
+          <.link navigate={~p"/projects/new"}
+            class="bg-gray-900 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-gray-700 transition-colors">
+            New project
+          </.link>
+        </div>
       </div>
 
       <%= if @projects == [] do %>

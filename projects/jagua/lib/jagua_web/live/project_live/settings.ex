@@ -10,16 +10,18 @@ defmodule JaguaWeb.Live.ProjectLive.Settings do
     case load_project(slug) do
       {:ok, project} ->
         channels = load_channels(project.id)
+        memberships = load_memberships(project.id)
 
         {:ok,
          assign(socket,
            project: project,
            status_url: status_url(slug),
            channels: channels,
-           # nil | :email | :telegram | :webhook
+           memberships: memberships,
            adding_channel: nil,
            new_channel_name: "",
-           new_channel_config: %{}
+           new_channel_config: %{},
+           invite_email: ""
          )}
 
       :error ->
@@ -42,6 +44,12 @@ defmodule JaguaWeb.Live.ProjectLive.Settings do
     end
   end
 
+  defp load_memberships(project_id) do
+    Jagua.Projects.Membership
+    |> Ash.Query.for_read(:for_project, %{project_id: project_id})
+    |> Ash.read!(domain: Jagua.Projects)
+  end
+
   defp load_channels(project_id) do
     Jagua.Alerts.AlertChannel
     |> Ash.Query.for_read(:all_for_project, %{project_id: project_id})
@@ -61,6 +69,49 @@ defmodule JaguaWeb.Live.ProjectLive.Settings do
       |> Ash.update!(domain: Jagua.Projects)
 
     {:noreply, assign(socket, project: updated)}
+  end
+
+  @impl true
+  def handle_event("invite_member", %{"email" => email}, socket) do
+    email = String.trim(email)
+    project = socket.assigns.project
+
+    with false <- email == "",
+         {:ok, user} <- get_or_create_user(email),
+         false <- already_member?(socket.assigns.memberships, user.id) do
+      Jagua.Projects.Membership
+      |> Ash.Changeset.for_create(:create, %{project_id: project.id, user_id: user.id})
+      |> Ash.create!(domain: Jagua.Projects)
+
+      # Send them a magic link so they can log in
+      Task.start(fn -> Jagua.Accounts.Auth.request_magic_link(email) end)
+
+      memberships = load_memberships(project.id)
+
+      {:noreply,
+       socket
+       |> put_flash(:info, "Invited #{email}. They'll receive a login link.")
+       |> assign(memberships: memberships, invite_email: "")}
+    else
+      true ->
+        {:noreply, put_flash(socket, :error, "That email is already a member.")}
+
+      {:error, _} ->
+        {:noreply, put_flash(socket, :error, "Failed to invite member.")}
+    end
+  end
+
+  @impl true
+  def handle_event("remove_member", %{"id" => id}, socket) do
+    membership = Enum.find(socket.assigns.memberships, &(to_string(&1.id) == id))
+
+    if membership do
+      Ash.destroy!(membership, domain: Jagua.Projects)
+      memberships = load_memberships(socket.assigns.project.id)
+      {:noreply, assign(socket, memberships: memberships)}
+    else
+      {:noreply, socket}
+    end
   end
 
   @impl true
@@ -144,6 +195,29 @@ defmodule JaguaWeb.Live.ProjectLive.Settings do
     end
   end
 
+  defp get_or_create_user(email) do
+    query =
+      Jagua.Accounts.User
+      |> Ash.Query.for_read(:by_email, %{email: email})
+
+    case Ash.read_one(query, domain: Jagua.Accounts) do
+      {:ok, nil} ->
+        Jagua.Accounts.User
+        |> Ash.Changeset.for_create(:create, %{email: email})
+        |> Ash.create(domain: Jagua.Accounts)
+
+      {:ok, user} ->
+        {:ok, user}
+
+      error ->
+        error
+    end
+  end
+
+  defp already_member?(memberships, user_id) do
+    Enum.any?(memberships, &(&1.user_id == user_id))
+  end
+
   defp build_config(:email, params) do
     emails =
       params
@@ -210,6 +284,45 @@ defmodule JaguaWeb.Live.ProjectLive.Settings do
             ]} />
           </button>
         </div>
+      </div>
+
+      <%!-- Team --%>
+      <div class="bg-white rounded-xl border border-gray-200 p-6 mb-4">
+        <h2 class="text-sm font-semibold text-gray-900 mb-4">Team</h2>
+
+        <%= if @memberships != [] do %>
+          <div class="space-y-2 mb-4">
+            <%= for m <- @memberships do %>
+              <div class="flex items-center justify-between rounded-lg border border-gray-100 px-4 py-3">
+                <span class="text-sm text-gray-700"><%= m.user.email %></span>
+                <button
+                  phx-click="remove_member"
+                  phx-value-id={m.id}
+                  data-confirm={"Remove #{m.user.email} from this project?"}
+                  class="text-xs text-red-400 hover:text-red-600"
+                >
+                  Remove
+                </button>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
+        <form phx-submit="invite_member" class="flex gap-2">
+          <input
+            type="email"
+            name="email"
+            value={@invite_email}
+            required
+            placeholder="colleague@example.com"
+            class="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
+          />
+          <button type="submit"
+            class="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 whitespace-nowrap">
+            Invite
+          </button>
+        </form>
+        <p class="text-xs text-gray-400 mt-2">They'll receive a magic link to log in and access this project.</p>
       </div>
 
       <%!-- Alert channels --%>

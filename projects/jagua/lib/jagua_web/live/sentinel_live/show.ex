@@ -66,6 +66,43 @@ defmodule JaguaWeb.Live.SentinelLive.Show do
   end
 
   @impl true
+  def handle_event("update_sentinel", params, socket) do
+    sentinel = socket.assigns.sentinel
+
+    tags =
+      params
+      |> Map.get("tags", "")
+      |> String.split([",", " "], trim: true)
+      |> Enum.map(&String.trim/1)
+      |> Enum.reject(&(&1 == ""))
+
+    attrs =
+      params
+      |> Map.take(["name", "interval", "alert_type", "notes"])
+      |> Map.put("tags", tags)
+      |> atomize_keys()
+
+    case sentinel
+         |> Ash.Changeset.for_update(:update, attrs)
+         |> Ash.update(domain: Jagua.Sentinels) do
+      {:ok, updated} ->
+        # Restart timer if interval or alert_type changed
+        if updated.interval != sentinel.interval or updated.alert_type != sentinel.alert_type do
+          Jagua.Sentinel.Timer.stop(sentinel.id)
+          Jagua.Sentinel.Timer.ensure_started(updated)
+        end
+
+        {:noreply,
+         socket
+         |> put_flash(:info, "Sentinel updated.")
+         |> assign(sentinel: updated)}
+
+      {:error, _changeset} ->
+        {:noreply, put_flash(socket, :error, "Failed to update sentinel.")}
+    end
+  end
+
+  @impl true
   def handle_event("pause", _params, socket) do
     sentinel =
       socket.assigns.sentinel
@@ -350,57 +387,100 @@ defmodule JaguaWeb.Live.SentinelLive.Show do
     """
   end
 
+  @intervals [
+    {"1_minute", "1 minute"}, {"2_minute", "2 minutes"}, {"3_minute", "3 minutes"},
+    {"5_minute", "5 minutes"}, {"10_minute", "10 minutes"}, {"15_minute", "15 minutes"},
+    {"20_minute", "20 minutes"}, {"30_minute", "30 minutes"}, {"hourly", "Hourly"},
+    {"2_hour", "2 hours"}, {"3_hour", "3 hours"}, {"4_hour", "4 hours"},
+    {"6_hour", "6 hours"}, {"8_hour", "8 hours"}, {"12_hour", "12 hours"},
+    {"daily", "Daily"}, {"weekly", "Weekly"}, {"monthly", "Monthly"}
+  ]
+
   defp settings_tab(assigns) do
+    assigns = assign(assigns, intervals: @intervals)
+
     ~H"""
     <div class="space-y-6">
-      <div class="bg-white rounded-xl border border-gray-200 p-6">
-        <h3 class="text-sm font-semibold text-gray-900 mb-4">Details</h3>
-        <dl class="space-y-3 text-sm">
-          <div class="flex gap-4">
-            <dt class="text-gray-400 w-24 flex-shrink-0">Token</dt>
-            <dd class="font-mono text-gray-700"><%= @sentinel.token %></dd>
-          </div>
-          <div class="flex gap-4">
-            <dt class="text-gray-400 w-24 flex-shrink-0">Interval</dt>
-            <dd class="text-gray-700"><%= format_interval(@sentinel.interval) %></dd>
-          </div>
-          <div class="flex gap-4">
-            <dt class="text-gray-400 w-24 flex-shrink-0">Alert type</dt>
-            <dd class="text-gray-700 capitalize"><%= @sentinel.alert_type %></dd>
-          </div>
-          <%= if @sentinel.notes do %>
-            <div class="flex gap-4">
-              <dt class="text-gray-400 w-24 flex-shrink-0">Notes</dt>
-              <dd class="text-gray-700"><%= @sentinel.notes %></dd>
-            </div>
-          <% end %>
-        </dl>
-      </div>
+      <%!-- Edit form --%>
+      <form phx-submit="update_sentinel" class="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+        <h3 class="text-sm font-semibold text-gray-900">Edit sentinel</h3>
 
-      <div class="bg-white rounded-xl border border-gray-200 p-6">
-        <h3 class="text-sm font-semibold text-gray-900 mb-4">Actions</h3>
-        <div class="flex gap-3">
-          <%= if @sentinel.status == :paused do %>
-            <button phx-click="unpause"
-              class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-              Unpause
-            </button>
-          <% else %>
-            <button phx-click="pause"
-              class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-              Pause
-            </button>
-          <% end %>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Name</label>
+          <input type="text" name="name" value={@sentinel.name} required
+            class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400" />
         </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs text-gray-500 mb-1">Interval</label>
+            <select name="interval"
+              class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-400">
+              <%= for {val, label} <- @intervals do %>
+                <option value={val} selected={to_string(@sentinel.interval) == val}><%= label %></option>
+              <% end %>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs text-gray-500 mb-1">Alert type</label>
+            <select name="alert_type"
+              class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-400">
+              <option value="basic" selected={@sentinel.alert_type == :basic}>Basic</option>
+              <option value="smart" selected={@sentinel.alert_type == :smart}>Smart</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Tags (comma-separated)</label>
+          <input type="text" name="tags" value={Enum.join(@sentinel.tags, ", ")}
+            placeholder="e.g. production, backup, nightly"
+            class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400" />
+        </div>
+
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Notes</label>
+          <textarea name="notes" rows="2"
+            placeholder="Optional description or link to the job"
+            class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"><%= @sentinel.notes %></textarea>
+        </div>
+
+        <div class="flex items-center justify-between pt-1">
+          <button type="submit"
+            class="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">
+            Save changes
+          </button>
+          <p class="text-xs text-gray-400 font-mono">Token: <%= @sentinel.token %></p>
+        </div>
+      </form>
+
+      <%!-- Pause / unpause --%>
+      <div class="bg-white rounded-xl border border-gray-200 p-6">
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">Monitoring</h3>
+        <%= if @sentinel.status == :paused do %>
+          <p class="text-sm text-gray-500 mb-3">This sentinel is paused. Check-ins are accepted but no alerts will fire.</p>
+          <button phx-click="unpause"
+            class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+            Resume monitoring
+          </button>
+        <% else %>
+          <p class="text-sm text-gray-500 mb-3">Pause to suppress alerts during planned downtime.</p>
+          <button phx-click="pause"
+            class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+            Pause
+          </button>
+        <% end %>
       </div>
 
+      <%!-- Danger zone --%>
       <div class="bg-white rounded-xl border border-red-200 p-6">
         <h3 class="text-sm font-semibold text-red-700 mb-2">Danger zone</h3>
         <p class="text-sm text-gray-500 mb-4">
           Permanently delete this sentinel and all its check-in history.
         </p>
         <button phx-click="delete"
-          data-confirm={"Delete sentinel "#{@sentinel.name}"? This cannot be undone."}
+          data-confirm={"Delete sentinel \"#{@sentinel.name}\"? This cannot be undone."}
           class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700">
           Delete sentinel
         </button>
@@ -421,6 +501,10 @@ defmodule JaguaWeb.Live.SentinelLive.Show do
 
     assigns = assign(assigns, color: color)
     ~H(<span class={"w-3 h-3 rounded-full flex-shrink-0 #{@color}"} />)
+  end
+
+  defp atomize_keys(map) do
+    Map.new(map, fn {k, v} -> {String.to_existing_atom(k), v} end)
   end
 
   defp status_badge(assigns) do

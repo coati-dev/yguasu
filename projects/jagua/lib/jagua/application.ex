@@ -13,6 +13,7 @@ defmodule Jagua.Application do
       {DNSCluster, query: Application.get_env(:jagua, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Jagua.PubSub},
       {Finch, name: Jagua.Finch},
+      Jagua.RateLimiter,
       {Registry, keys: :unique, name: Jagua.Sentinel.Registry},
       {DynamicSupervisor, name: Jagua.Sentinel.Supervisor, strategy: :one_for_one},
       Jagua.Sentinel.Loader,

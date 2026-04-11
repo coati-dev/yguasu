@@ -28,5 +28,11 @@ defmodule Jagua.Projects.Membership do
     create :create do
       accept [:project_id, :user_id]
     end
+
+    read :for_project do
+      argument :project_id, :uuid, allow_nil?: false
+      filter expr(project_id == ^arg(:project_id))
+      prepare build(load: [:user])
+    end
   end
 end

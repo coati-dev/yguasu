@@ -165,12 +165,28 @@ defmodule Jagua.Sentinels.Heatmap do
     result
   end
 
-  defp next_bucket(bucket_start, interval) when interval in [:daily, :weekly, :monthly] do
-    subtract_buckets(bucket_start, interval, -1)
-  rescue
-    _ -> DateTime.add(bucket_start, 86400, :second)
+  defp next_bucket(bucket_start, :daily) do
+    date = DateTime.to_date(bucket_start)
+    next = Date.add(date, 1)
+    {:ok, result} = DateTime.new(next, ~T[00:00:00], "Etc/UTC")
+    result
   end
 
+  defp next_bucket(bucket_start, :weekly) do
+    date = DateTime.to_date(bucket_start)
+    next = Date.add(date, 7)
+    {:ok, result} = DateTime.new(next, ~T[00:00:00], "Etc/UTC")
+    result
+  end
+
+  defp next_bucket(bucket_start, :monthly) do
+    date = DateTime.to_date(bucket_start)
+    {year, month} =
+      if date.month == 12, do: {date.year + 1, 1}, else: {date.year, date.month + 1}
+    {:ok, first} = Date.new(year, month, 1)
+    {:ok, result} = DateTime.new(first, ~T[00:00:00], "Etc/UTC")
+    result
+  end
 
   defp next_bucket(bucket_start, interval) do
     seconds = Map.fetch!(@interval_seconds, interval)

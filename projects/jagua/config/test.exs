@@ -26,6 +26,9 @@ config :jagua, Jagua.Mailer, adapter: Swoosh.Adapters.Test
 # Disable swoosh api client as it is only required for production adapters
 config :swoosh, :api_client, false
 
+# Disable the sentinel loader in test — it queries the DB outside the sandbox
+config :jagua, sentinel_loader_enabled: false
+
 # Print only warnings and errors during test
 config :logger, level: :warning
 

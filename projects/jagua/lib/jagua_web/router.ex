@@ -20,10 +20,15 @@ defmodule JaguaWeb.Router do
   pipeline :api_auth do
     plug :accepts, ["json"]
     plug JaguaWeb.Plugs.ApiAuth
+    plug JaguaWeb.Plugs.RateLimit, type: :api, limit: 600, window: 60
   end
 
   pipeline :require_auth do
     plug :require_authenticated_user
+  end
+
+  pipeline :rate_limit_check_in do
+    plug JaguaWeb.Plugs.RateLimit, type: :check_in, limit: 60, window: 60
   end
 
   # --- Public routes ---
@@ -31,10 +36,18 @@ defmodule JaguaWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+  end
 
-    # Check-in endpoint — no auth, token is the credential
+  # Check-in endpoint — rate limited at 60/min per token
+  scope "/", JaguaWeb do
+    pipe_through [:browser, :rate_limit_check_in]
+
     get "/in/:token", CheckInController, :check_in
     post "/in/:token", CheckInController, :check_in
+  end
+
+  scope "/", JaguaWeb do
+    pipe_through :browser
 
     # Auth callbacks (controller-based — user follows link from email)
     get "/auth/confirm/:token", AuthController, :confirm
@@ -66,6 +79,7 @@ defmodule JaguaWeb.Router do
       live "/projects/:slug/sentinels/:token", Live.SentinelLive.Show, :show
       live "/projects/:slug/settings", Live.ProjectLive.Settings, :settings
       live "/projects/:slug/api-keys", Live.ApiKeysLive, :index
+      live "/settings", Live.SettingsLive, :index
     end
   end
 
