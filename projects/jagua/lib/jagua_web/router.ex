@@ -17,6 +17,11 @@ defmodule JaguaWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :api_auth do
+    plug :accepts, ["json"]
+    plug JaguaWeb.Plugs.ApiAuth
+  end
+
   pipeline :require_auth do
     plug :require_authenticated_user
   end
@@ -60,6 +65,20 @@ defmodule JaguaWeb.Router do
       live "/projects/:slug/sentinels/new", Live.SentinelLive.New, :new
       live "/projects/:slug/sentinels/:token", Live.SentinelLive.Show, :show
       live "/projects/:slug/settings", Live.ProjectLive.Settings, :settings
+      live "/projects/:slug/api-keys", Live.ApiKeysLive, :index
+    end
+  end
+
+  # --- REST API ---
+  scope "/api", JaguaWeb.Api do
+    pipe_through :api_auth
+
+    resources "/projects", ProjectController, except: [:new, :edit] do
+      resources "/sentinels", SentinelController, except: [:new, :edit], param: "token" do
+        post "/pause", SentinelController, :pause
+        post "/unpause", SentinelController, :unpause
+        resources "/check_ins", CheckInController, only: [:index], param: "sentinel_token"
+      end
     end
   end
 

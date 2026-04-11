@@ -45,6 +45,10 @@ defmodule JaguaWeb.Live.ProjectLive.Show do
       <div class="flex items-center justify-between mb-8 mt-2">
         <h1 class="text-2xl font-bold text-gray-900"><%= @project.name %></h1>
         <div class="flex items-center gap-2">
+          <.link navigate={~p"/projects/#{@project.slug}/api-keys"}
+            class="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+            API keys
+          </.link>
           <.link navigate={~p"/projects/#{@project.slug}/settings"}
             class="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
             Settings
