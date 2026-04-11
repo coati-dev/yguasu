@@ -19,8 +19,16 @@ defmodule Jagua.RateLimiter do
 
   @impl true
   def init(_) do
-    :ets.new(@table, [:named_table, :public, :set, read_concurrency: true, write_concurrency: true])
-    # Periodically clean up old windows
+    # If the table already exists (e.g. GenServer restarted), just reuse it.
+    # On first start, create it as public so all request-handling processes can
+    # write to it directly without going through this GenServer.
+    case :ets.whereis(@table) do
+      :undefined ->
+        :ets.new(@table, [:named_table, :public, :set, read_concurrency: true, write_concurrency: true])
+      _tid ->
+        :ok
+    end
+
     Process.send_after(self(), :cleanup, :timer.minutes(10))
     {:ok, %{}}
   end
@@ -51,10 +59,9 @@ defmodule Jagua.RateLimiter do
 
     count = :ets.update_counter(@table, ets_key, {2, 1}, {ets_key, 0})
 
-    if count <= limit do
-      :ok
-    else
-      {:error, :rate_limited}
-    end
+    if count <= limit, do: :ok, else: {:error, :rate_limited}
+  rescue
+    # Table doesn't exist yet (GenServer starting up) or just crashed — fail open
+    ArgumentError -> :ok
   end
 end
