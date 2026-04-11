@@ -35,8 +35,11 @@ defmodule JaguaWeb.Router do
     get "/auth/confirm/:token", AuthController, :confirm
     delete "/auth/logout", AuthController, :logout
 
-    # Public status page (no auth required)
-    live "/status/:slug", Live.StatusPageLive, :show
+    # Public status page — own live_session so the socket is properly signed
+    live_session :public,
+      on_mount: [{JaguaWeb.UserAuth, :fetch_current_user}] do
+      live "/status/:slug", Live.StatusPageLive, :show
+    end
 
     # Login page (LiveView — redirects away if already logged in)
     live_session :auth,

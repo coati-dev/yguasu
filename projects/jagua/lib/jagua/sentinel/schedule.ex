@@ -27,6 +27,23 @@ defmodule Jagua.Sentinel.Schedule do
     :"12_hour" => 720
   }
 
+  @calendar_seconds %{
+    daily: 86_400,
+    weekly: 7 * 86_400,
+    monthly: 30 * 86_400
+  }
+
+  @doc """
+  Returns the approximate number of seconds in one interval period.
+  For calendar intervals (daily/weekly/monthly) returns a nominal value.
+  """
+  def interval_seconds(interval) do
+    case Map.get(@interval_minutes, interval) do
+      nil -> Map.get(@calendar_seconds, interval, 86_400)
+      minutes -> minutes * 60
+    end
+  end
+
   @doc """
   Returns the next UTC window boundary for the given interval atom.
   For sub-day intervals, calculates the next multiple of the period from UTC midnight.

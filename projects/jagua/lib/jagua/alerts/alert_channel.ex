@@ -51,9 +51,16 @@ defmodule Jagua.Alerts.AlertChannel do
       accept [:name, :config, :enabled]
     end
 
+    # Returns only enabled channels — used by the alert dispatcher
     read :for_project do
       argument :project_id, :uuid, allow_nil?: false
       filter expr(project_id == ^arg(:project_id) and enabled == true)
+    end
+
+    # Returns all channels regardless of enabled state — used by the settings UI
+    read :all_for_project do
+      argument :project_id, :uuid, allow_nil?: false
+      filter expr(project_id == ^arg(:project_id))
     end
   end
 end
