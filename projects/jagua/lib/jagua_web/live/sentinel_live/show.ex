@@ -65,14 +65,20 @@ defmodule JaguaWeb.Live.SentinelLive.Show do
 
   @impl true
   def handle_event("pause", _params, socket) do
-    sentinel = Ash.update!(socket.assigns.sentinel, %{}, action: :pause, domain: Jagua.Sentinels)
+    sentinel =
+      socket.assigns.sentinel
+      |> Ash.Changeset.for_update(:pause, %{})
+      |> Ash.update!(domain: Jagua.Sentinels)
     Jagua.Sentinel.Timer.stop(sentinel.id)
     {:noreply, assign(socket, sentinel: sentinel)}
   end
 
   @impl true
   def handle_event("unpause", _params, socket) do
-    sentinel = Ash.update!(socket.assigns.sentinel, %{}, action: :unpause, domain: Jagua.Sentinels)
+    sentinel =
+      socket.assigns.sentinel
+      |> Ash.Changeset.for_update(:unpause, %{})
+      |> Ash.update!(domain: Jagua.Sentinels)
     Jagua.Sentinel.Timer.ensure_started(sentinel)
     {:noreply, assign(socket, sentinel: sentinel)}
   end

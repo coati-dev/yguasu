@@ -10,7 +10,7 @@ defmodule Jagua.Mailer.MagicLinkEmail do
 
     new()
     |> from({"Jagua", "noreply@jagua.app"})
-    |> to(to_email)
+    |> to(to_string(to_email))
     |> subject("Your Jagua login link")
     |> text_body("""
     Click the link below to log in to Jagua.

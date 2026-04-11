@@ -44,12 +44,13 @@ defmodule JaguaWeb.CheckInController do
 
   defp handle_check_in(conn, sentinel, exit_code, message) do
     # Record check-in in DB
-    Ash.create!(
-      Jagua.Sentinels.CheckIn,
-      %{sentinel_id: sentinel.id, exit_code: exit_code, message: message},
-      action: :record,
-      domain: Jagua.Sentinels
-    )
+    Jagua.Sentinels.CheckIn
+    |> Ash.Changeset.for_create(:record, %{
+      sentinel_id: sentinel.id,
+      exit_code: exit_code,
+      message: message
+    })
+    |> Ash.create!(domain: Jagua.Sentinels)
 
     # Update sentinel status
     sentinel

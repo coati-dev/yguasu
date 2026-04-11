@@ -39,7 +39,9 @@ defmodule Jagua.Accounts.Auth do
         {:error, :invalid}
 
       {:ok, magic_link} ->
-        Ash.update!(magic_link, %{}, action: :consume, domain: Jagua.Accounts)
+        magic_link
+        |> Ash.Changeset.for_update(:consume, %{})
+        |> Ash.update!(domain: Jagua.Accounts)
         {:ok, magic_link.user}
 
       {:error, _} ->
@@ -56,7 +58,9 @@ defmodule Jagua.Accounts.Auth do
 
     case Ash.read_one(query, domain: Jagua.Accounts) do
       {:ok, nil} ->
-        Ash.create(Jagua.Accounts.User, %{email: email}, domain: Jagua.Accounts)
+        Jagua.Accounts.User
+        |> Ash.Changeset.for_create(:create, %{email: email})
+        |> Ash.create(domain: Jagua.Accounts)
 
       {:ok, user} ->
         {:ok, user}
@@ -71,11 +75,16 @@ defmodule Jagua.Accounts.Auth do
     token_hash = hash_token(raw_token)
     expires_at = DateTime.add(DateTime.utc_now(), @token_validity_minutes, :minute)
 
-    case Ash.create(
-           Jagua.Accounts.MagicLink,
-           %{user_id: user.id, token_hash: token_hash, expires_at: expires_at},
-           domain: Jagua.Accounts
-         ) do
+    result =
+      Jagua.Accounts.MagicLink
+      |> Ash.Changeset.for_create(:create, %{
+        user_id: user.id,
+        token_hash: token_hash,
+        expires_at: expires_at
+      })
+      |> Ash.create(domain: Jagua.Accounts)
+
+    case result do
       {:ok, _} -> {:ok, raw_token}
       error -> error
     end

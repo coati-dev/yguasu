@@ -102,7 +102,9 @@ defmodule Jagua.Sentinel.Timer do
         Ash.get!(Jagua.Sentinels.Sentinel, sentinel_id, domain: Sentinels)
       end)
 
-    Ash.update!(sentinel, %{}, action: :mark_failed, domain: Sentinels)
+    sentinel
+    |> Ash.Changeset.for_update(:mark_failed, %{})
+    |> Ash.update!(domain: Sentinels)
     Jagua.Alerts.Dispatcher.dispatch(sentinel, :failed)
   rescue
     e ->
