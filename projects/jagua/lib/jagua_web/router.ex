@@ -35,6 +35,9 @@ defmodule JaguaWeb.Router do
     get "/auth/confirm/:token", AuthController, :confirm
     delete "/auth/logout", AuthController, :logout
 
+    # Public status page (no auth required)
+    live "/status/:slug", Live.StatusPageLive, :show
+
     # Login page (LiveView — redirects away if already logged in)
     live_session :auth,
       on_mount: [{JaguaWeb.UserAuth, :redirect_if_authenticated}] do
@@ -53,6 +56,7 @@ defmodule JaguaWeb.Router do
       live "/projects/:slug", Live.ProjectLive.Show, :index
       live "/projects/:slug/sentinels/new", Live.SentinelLive.New, :new
       live "/projects/:slug/sentinels/:token", Live.SentinelLive.Show, :show
+      live "/projects/:slug/settings", Live.ProjectLive.Settings, :settings
     end
   end
 

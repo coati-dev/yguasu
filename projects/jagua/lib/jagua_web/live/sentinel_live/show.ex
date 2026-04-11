@@ -12,12 +12,14 @@ defmodule JaguaWeb.Live.SentinelLive.Show do
     case load_sentinel(slug, token) do
       {:ok, project, sentinel} ->
         check_ins = load_recent_check_ins(sentinel.id)
+        heatmap = Jagua.Sentinels.Heatmap.build(sentinel)
 
         {:ok,
          assign(socket,
            project: project,
            sentinel: sentinel,
            check_ins: check_ins,
+           heatmap: heatmap,
            tab: "activity",
            check_in_url: check_in_url(token)
          )}
@@ -129,7 +131,7 @@ defmodule JaguaWeb.Live.SentinelLive.Show do
       </div>
 
       <%= if @tab == "activity" do %>
-        <.activity_tab sentinel={@sentinel} check_ins={@check_ins} />
+        <.activity_tab sentinel={@sentinel} check_ins={@check_ins} heatmap={@heatmap} />
       <% end %>
       <%= if @tab == "setup" do %>
         <.setup_tab sentinel={@sentinel} check_in_url={@check_in_url} />
@@ -144,6 +146,7 @@ defmodule JaguaWeb.Live.SentinelLive.Show do
   defp activity_tab(assigns) do
     ~H"""
     <div class="space-y-6">
+      <%!-- Stats row --%>
       <div class="grid grid-cols-2 gap-4">
         <div class="bg-white rounded-xl border border-gray-200 p-5">
           <p class="text-xs text-gray-400 font-medium uppercase tracking-wide mb-1">Last check-in</p>
@@ -161,6 +164,29 @@ defmodule JaguaWeb.Live.SentinelLive.Show do
         </div>
       </div>
 
+      <%!-- Heatmap --%>
+      <div class="bg-white rounded-xl border border-gray-200 p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-medium text-gray-900">Activity</h3>
+          <div class="flex items-center gap-3 text-xs text-gray-400">
+            <span class="flex items-center gap-1">
+              <span class="w-2.5 h-2.5 rounded-sm bg-green-400 inline-block"></span> Healthy
+            </span>
+            <span class="flex items-center gap-1">
+              <span class="w-2.5 h-2.5 rounded-sm bg-orange-400 inline-block"></span> Errored
+            </span>
+            <span class="flex items-center gap-1">
+              <span class="w-2.5 h-2.5 rounded-sm bg-red-400 inline-block"></span> Missed
+            </span>
+            <span class="flex items-center gap-1">
+              <span class="w-2.5 h-2.5 rounded-sm bg-gray-200 inline-block"></span> No data
+            </span>
+          </div>
+        </div>
+        <.heatmap_grid cells={@heatmap.cells} interval={@heatmap.interval} />
+      </div>
+
+      <%!-- Recent check-ins log --%>
       <%= if @check_ins != [] do %>
         <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div class="px-5 py-4 border-b border-gray-100">
@@ -173,14 +199,16 @@ defmodule JaguaWeb.Live.SentinelLive.Show do
                   "w-2 h-2 rounded-full flex-shrink-0",
                   if(ci.status == :ok, do: "bg-green-400", else: "bg-orange-400")
                 ]} />
-                <span class="text-xs text-gray-400 w-32 flex-shrink-0">
+                <span class="text-xs text-gray-400 w-36 flex-shrink-0">
                   <%= Calendar.strftime(ci.inserted_at, "%b %d %H:%M UTC") %>
                 </span>
                 <%= if ci.message do %>
                   <span class="text-sm text-gray-600 truncate"><%= ci.message %></span>
                 <% end %>
                 <%= if ci.exit_code != 0 do %>
-                  <span class="ml-auto text-xs text-orange-600 flex-shrink-0">exit <%= ci.exit_code %></span>
+                  <span class="ml-auto text-xs text-orange-600 flex-shrink-0">
+                    exit <%= ci.exit_code %>
+                  </span>
                 <% end %>
               </div>
             <% end %>
@@ -190,6 +218,85 @@ defmodule JaguaWeb.Live.SentinelLive.Show do
     </div>
     """
   end
+
+  defp heatmap_grid(%{interval: :daily} = assigns) do
+    # GitHub-style: 7 rows (Mon–Sun) × N columns (weeks), newest column on right
+    cells_by_week = Enum.chunk_every(assigns.cells, 7)
+    assigns = assign(assigns, cells_by_week: cells_by_week)
+
+    ~H"""
+    <div class="overflow-x-auto">
+      <div class="flex gap-0.5 min-w-0">
+        <%= for week <- @cells_by_week do %>
+          <div class="flex flex-col gap-0.5">
+            <%= for cell <- week do %>
+              <.heatmap_cell cell={cell} />
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+      <div class="flex justify-between mt-2 text-xs text-gray-400">
+        <span><%= heatmap_label(List.first(List.first(@cells_by_week)), :daily) %></span>
+        <span><%= heatmap_label(List.last(List.last(@cells_by_week)), :daily) %></span>
+      </div>
+    </div>
+    """
+  end
+
+  defp heatmap_grid(assigns) do
+    # Single scrollable row for sub-day and weekly/monthly intervals
+    ~H"""
+    <div class="overflow-x-auto">
+      <div class="flex gap-0.5 pb-1">
+        <%= for cell <- @cells do %>
+          <.heatmap_cell cell={cell} />
+        <% end %>
+      </div>
+      <div class="flex justify-between mt-2 text-xs text-gray-400">
+        <span><%= heatmap_label(List.first(@cells), @interval) %></span>
+        <span><%= heatmap_label(List.last(@cells), @interval) %></span>
+      </div>
+    </div>
+    """
+  end
+
+  defp heatmap_cell(assigns) do
+    color =
+      case assigns.cell.status do
+        :healthy -> "bg-green-400 hover:bg-green-500"
+        :errored -> "bg-orange-400 hover:bg-orange-500"
+        :missed -> "bg-red-400 hover:bg-red-500"
+        :unknown -> "bg-gray-100"
+        :future -> "bg-gray-50"
+      end
+
+    title = heatmap_cell_title(assigns.cell)
+    assigns = assign(assigns, color: color, title: title)
+
+    ~H"""
+    <div
+      class={"w-3 h-3 rounded-sm flex-shrink-0 cursor-default transition-colors #{@color}"}
+      title={@title}
+    />
+    """
+  end
+
+  defp heatmap_cell_title(%{status: :unknown}), do: "No data"
+  defp heatmap_cell_title(%{status: :future}), do: "Future"
+  defp heatmap_cell_title(%{bucket_start: dt, status: status, count: count}) do
+    label = Calendar.strftime(dt, "%b %d %H:%M UTC")
+    case status do
+      :healthy -> "#{label} — #{count} check-in(s)"
+      :errored -> "#{label} — errored (#{count} check-in(s))"
+      :missed -> "#{label} — missed"
+    end
+  end
+
+  defp heatmap_label(nil, _), do: ""
+  defp heatmap_label(%{bucket_start: dt}, :daily), do: Calendar.strftime(dt, "%b %Y")
+  defp heatmap_label(%{bucket_start: dt}, :weekly), do: Calendar.strftime(dt, "%b %d")
+  defp heatmap_label(%{bucket_start: dt}, :monthly), do: Calendar.strftime(dt, "%b %Y")
+  defp heatmap_label(%{bucket_start: dt}, _), do: Calendar.strftime(dt, "%b %d %H:%M")
 
   defp setup_tab(assigns) do
     ~H"""

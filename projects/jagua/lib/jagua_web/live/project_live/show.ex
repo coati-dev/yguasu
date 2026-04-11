@@ -44,10 +44,16 @@ defmodule JaguaWeb.Live.ProjectLive.Show do
 
       <div class="flex items-center justify-between mb-8 mt-2">
         <h1 class="text-2xl font-bold text-gray-900"><%= @project.name %></h1>
-        <.link navigate={~p"/projects/#{@project.slug}/sentinels/new"}
-          class="bg-gray-900 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-gray-700 transition-colors">
-          New sentinel
-        </.link>
+        <div class="flex items-center gap-2">
+          <.link navigate={~p"/projects/#{@project.slug}/settings"}
+            class="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+            Settings
+          </.link>
+          <.link navigate={~p"/projects/#{@project.slug}/sentinels/new"}
+            class="bg-gray-900 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-gray-700 transition-colors">
+            New sentinel
+          </.link>
+        </div>
       </div>
 
       <%= if @sentinels == [] do %>
