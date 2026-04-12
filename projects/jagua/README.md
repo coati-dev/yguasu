@@ -105,8 +105,8 @@ Jagua is a standard Phoenix application backed by PostgreSQL.
 **Requirements:** Elixir 1.14+, PostgreSQL 14+
 
 ```bash
-git clone https://github.com/coati-dev/jagua
-cd jagua
+git clone https://github.com/coati-dev/yguasu
+cd yguasu/projects/jagua
 mix setup
 mix phx.server
 ```
