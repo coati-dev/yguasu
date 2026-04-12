@@ -39,7 +39,7 @@ defmodule JaguaWeb.CheckInController do
     # Still accept the check-in but don't change status
     conn
     |> put_status(:ok)
-    |> text("Got it, thanks (sentinel is paused).")
+    |> text("Jagua got it! Much obliged (sentinel is paused).")
   end
 
   defp handle_check_in(conn, sentinel, exit_code, message) do
@@ -70,7 +70,7 @@ defmodule JaguaWeb.CheckInController do
 
     conn
     |> put_status(:ok)
-    |> text("Got it, thanks.")
+    |> text("Jagua got it! Much obliged.")
   end
 
   defp parse_exit_code(nil), do: 0
