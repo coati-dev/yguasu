@@ -86,7 +86,8 @@ defmodule JaguaWeb.Live.DashboardLive do
     assigns = assign(assigns,
       failed: Map.get(counts, :failed, 0) + Map.get(counts, :errored, 0),
       healthy: Map.get(counts, :healthy, 0),
-      pending: Map.get(counts, :pending, 0)
+      pending: Map.get(counts, :pending, 0),
+      paused: Map.get(counts, :paused, 0)
     )
 
     ~H"""
@@ -103,6 +104,11 @@ defmodule JaguaWeb.Live.DashboardLive do
     <%= if @pending > 0 do %>
       <span class="inline-flex items-center rounded-full bg-gray-100 text-gray-500 text-xs font-medium px-2 py-0.5">
         <%= @pending %> pending
+      </span>
+    <% end %>
+    <%= if @paused > 0 do %>
+      <span class="inline-flex items-center rounded-full bg-yellow-100 text-yellow-700 text-xs font-medium px-2 py-0.5">
+        <%= @paused %> paused
       </span>
     <% end %>
     """

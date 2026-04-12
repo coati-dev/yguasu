@@ -94,26 +94,32 @@ defmodule Jagua.Sentinel.Timer do
     # Cancel smart timer if it hasn't fired yet
     if state.smart_timer_ref, do: Process.cancel_timer(state.smart_timer_ref)
 
-    {:noreply, %{state | check_in_received?: true, smart_timer_ref: nil}}
+    {:noreply, %{state | check_in_received?: true, status: :healthy, smart_timer_ref: nil}}
   end
 
   @impl true
   def handle_info(:check_window, state) do
-    if state.check_in_received? do
-      state = schedule_next(%{state | check_in_received?: false})
-      state = maybe_schedule_smart_alert(state)
-      {:noreply, state}
-    else
-      fire_alert(state.sentinel_id, :failed)
-      state = schedule_next(%{state | check_in_received?: false})
-      state = maybe_schedule_smart_alert(state)
-      {:noreply, state}
-    end
+    state =
+      if state.check_in_received? do
+        # Received a check-in this window — healthy, update in-memory status
+        %{state | check_in_received?: false, status: :healthy}
+      else
+        # No check-in — only alert if sentinel has checked in at least once before
+        if state.status != :pending do
+          fire_alert(state.sentinel_id, :failed)
+        end
+
+        state
+      end
+
+    state = schedule_next(state)
+    state = maybe_schedule_smart_alert(state)
+    {:noreply, state}
   end
 
   @impl true
   def handle_info(:smart_check, state) do
-    unless state.check_in_received? do
+    unless state.check_in_received? or state.status == :pending do
       Logger.info("Sentinel #{state.sentinel_id} smart alert triggered — firing early alert")
       fire_alert(state.sentinel_id, :failed)
     end

@@ -62,6 +62,31 @@ defmodule JaguaWeb.Live.ProjectLive.Settings do
   defp status_url(slug), do: JaguaWeb.Endpoint.url() <> "/status/#{slug}"
 
   @impl true
+  def handle_event("rename_project", %{"name" => name}, socket) do
+    name = String.trim(name)
+
+    if name == "" do
+      {:noreply, put_flash(socket, :error, "Name can't be blank.")}
+    else
+      slug = slugify(name)
+
+      case socket.assigns.project
+           |> Ash.Changeset.for_update(:update, %{name: name, slug: slug})
+           |> Ash.update(domain: Jagua.Projects) do
+        {:ok, updated} ->
+          {:noreply,
+           socket
+           |> assign(project: updated, page_title: "Settings · #{updated.name}")
+           |> put_flash(:info, "Project renamed.")
+           |> push_navigate(to: ~p"/projects/#{updated.slug}/settings")}
+
+        {:error, _} ->
+          {:noreply, put_flash(socket, :error, "Failed to rename project.")}
+      end
+    end
+  end
+
+  @impl true
   def handle_event("toggle_status_page", _params, socket) do
     project = socket.assigns.project
     new_val = !project.public_status_page
@@ -198,6 +223,14 @@ defmodule JaguaWeb.Live.ProjectLive.Settings do
     end
   end
 
+  defp slugify(name) do
+    name
+    |> String.downcase()
+    |> String.replace(~r/[^a-z0-9\s-]/, "")
+    |> String.replace(~r/\s+/, "-")
+    |> String.trim("-")
+  end
+
   defp get_or_create_user(email) do
     query =
       Jagua.Accounts.User
@@ -256,6 +289,24 @@ defmodule JaguaWeb.Live.ProjectLive.Settings do
       </.link>
 
       <h1 class="text-2xl font-bold text-gray-900 mb-8">Project settings</h1>
+
+      <%!-- Rename project --%>
+      <div class="bg-white rounded-xl border border-gray-200 p-6 mb-4">
+        <h2 class="text-sm font-semibold text-gray-900 mb-4">Project name</h2>
+        <form phx-submit="rename_project" class="flex gap-2">
+          <input
+            type="text"
+            name="name"
+            value={@project.name}
+            required
+            class="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
+          />
+          <button type="submit"
+            class="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 whitespace-nowrap">
+            Rename
+          </button>
+        </form>
+      </div>
 
       <%!-- Status page --%>
       <div class="bg-white rounded-xl border border-gray-200 p-6 mb-4">
