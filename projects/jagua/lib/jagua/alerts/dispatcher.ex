@@ -19,16 +19,8 @@ defmodule Jagua.Alerts.Dispatcher do
       |> Ash.Query.for_read(:for_project, %{project_id: sentinel.project_id})
       |> Ash.read!(domain: Jagua.Alerts)
 
-    caller = self()
     Enum.each(channels, fn channel ->
-      Task.start(fn ->
-        try do
-          Ecto.Adapters.SQL.Sandbox.allow(Jagua.Repo, caller, self())
-          send_to_channel(channel, sentinel, type)
-        catch
-          :exit, _ -> :ok
-        end
-      end)
+      Jagua.Tasks.start(fn -> send_to_channel(channel, sentinel, type) end)
     end)
   end
 

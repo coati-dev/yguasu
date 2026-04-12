@@ -20,15 +20,7 @@ defmodule JaguaWeb.Plugs.ApiAuth do
          key_hash = hash(raw_key),
          {:ok, [api_key | _]} <- load_key(key_hash),
          {:ok, project} <- load_project(api_key.project_id) do
-      caller = self()
-      Task.start(fn ->
-        try do
-          Ecto.Adapters.SQL.Sandbox.allow(Jagua.Repo, caller, self())
-          touch_key(api_key)
-        catch
-          :exit, _ -> :ok
-        end
-      end)
+      Jagua.Tasks.start(fn -> touch_key(api_key) end)
 
       conn
       |> assign(:current_api_key, api_key)

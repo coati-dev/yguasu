@@ -62,15 +62,7 @@ defmodule JaguaWeb.CheckInController do
 
     # Fire recovered alert if it was previously failed/errored and is now healthy
     if prev_status in [:failed, :errored] and updated.status == :healthy do
-      caller = self()
-      Task.start(fn ->
-        try do
-          Ecto.Adapters.SQL.Sandbox.allow(Jagua.Repo, caller, self())
-          Jagua.Alerts.Dispatcher.dispatch(updated, :recovered)
-        catch
-          :exit, _ -> :ok
-        end
-      end)
+      Jagua.Tasks.start(fn -> Jagua.Alerts.Dispatcher.dispatch(updated, :recovered) end)
     end
 
     # Notify the OTP timer so it resets the window

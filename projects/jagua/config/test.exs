@@ -29,6 +29,10 @@ config :swoosh, :api_client, false
 # Disable the sentinel loader in test — it queries the DB outside the sandbox
 config :jagua, sentinel_loader_enabled: false
 
+# Run fire-and-forget tasks synchronously so they complete before the sandbox
+# is torn down, preventing Postgrex connection-leak log noise in tests.
+config :jagua, async_tasks: false
+
 # Print only warnings and errors during test
 config :logger, level: :warning
 
