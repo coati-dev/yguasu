@@ -18,7 +18,8 @@ defmodule JaguaWeb.Live.ApiKeysLive do
            # %{id: key_id, raw_key: "jg_..."} — shown only once, then cleared
            revealed_key: nil,
            adding: false,
-           new_key_name: ""
+           new_key_name: "",
+           page_title: "API Keys · #{project.name}"
          )}
 
       :error ->

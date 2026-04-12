@@ -11,7 +11,7 @@ defmodule JaguaWeb.Live.ProjectLive.New do
         as: "project"
       )
 
-    {:ok, assign(socket, form: to_form(form))}
+    {:ok, assign(socket, form: to_form(form), page_title: "New project")}
   end
 
   @impl true

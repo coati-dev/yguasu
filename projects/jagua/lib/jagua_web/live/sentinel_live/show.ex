@@ -21,7 +21,8 @@ defmodule JaguaWeb.Live.SentinelLive.Show do
            check_ins: check_ins,
            heatmap: heatmap,
            tab: "activity",
-           check_in_url: check_in_url(token)
+           check_in_url: check_in_url(token),
+           page_title: sentinel.name
          )}
 
       :error ->

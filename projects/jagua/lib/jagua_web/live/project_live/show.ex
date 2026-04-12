@@ -11,7 +11,7 @@ defmodule JaguaWeb.Live.ProjectLive.Show do
   def mount(%{"slug" => slug}, _session, socket) do
     case load_project(slug) do
       {:ok, project} ->
-        {:ok, assign(socket, project: project, sentinels: project.sentinels)}
+        {:ok, assign(socket, project: project, sentinels: project.sentinels, page_title: project.name)}
 
       :error ->
         {:ok,

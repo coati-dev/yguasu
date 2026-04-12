@@ -40,7 +40,8 @@ defmodule JaguaWeb.Live.SentinelLive.New do
          assign(socket,
            project: project,
            form: to_form(form),
-           intervals: @intervals
+           intervals: @intervals,
+           page_title: "New sentinel · #{project.name}"
          )}
 
       :error ->

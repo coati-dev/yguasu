@@ -27,7 +27,10 @@ defmodule JaguaWeb.Router do
     plug :require_authenticated_user
   end
 
-  pipeline :rate_limit_check_in do
+  # Check-in pipeline: no CSRF (requests come from cron jobs / scripts, not browsers),
+  # no session needed, just rate limiting.
+  pipeline :check_in do
+    plug :accepts, ["html", "text"]
     plug JaguaWeb.Plugs.RateLimit, type: :check_in, limit: 60, window: 60
   end
 
@@ -38,9 +41,9 @@ defmodule JaguaWeb.Router do
     get "/", PageController, :home
   end
 
-  # Check-in endpoint — rate limited at 60/min per token
+  # Check-in endpoint — no CSRF, rate limited at 60/min per token
   scope "/", JaguaWeb do
-    pipe_through [:browser, :rate_limit_check_in]
+    pipe_through :check_in
 
     get "/in/:token", CheckInController, :check_in
     post "/in/:token", CheckInController, :check_in

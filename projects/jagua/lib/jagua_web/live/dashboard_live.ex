@@ -8,7 +8,7 @@ defmodule JaguaWeb.Live.DashboardLive do
   @impl true
   def mount(_params, _session, socket) do
     projects = load_projects(socket.assigns.current_user.id)
-    {:ok, assign(socket, projects: projects)}
+    {:ok, assign(socket, projects: projects, page_title: "Dashboard")}
   end
 
   @impl true

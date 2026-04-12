@@ -11,17 +11,20 @@ defmodule JaguaWeb.Live.ProjectLive.Settings do
       {:ok, project} ->
         channels = load_channels(project.id)
         memberships = load_memberships(project.id)
+        owner = Ash.get!(Jagua.Accounts.User, project.owner_id, domain: Jagua.Accounts)
 
         {:ok,
          assign(socket,
            project: project,
+           owner: owner,
            status_url: status_url(slug),
            channels: channels,
            memberships: memberships,
            adding_channel: nil,
            new_channel_name: "",
            new_channel_config: %{},
-           invite_email: ""
+           invite_email: "",
+           page_title: "Settings · #{project.name}"
          )}
 
       :error ->
@@ -290,23 +293,29 @@ defmodule JaguaWeb.Live.ProjectLive.Settings do
       <div class="bg-white rounded-xl border border-gray-200 p-6 mb-4">
         <h2 class="text-sm font-semibold text-gray-900 mb-4">Team</h2>
 
-        <%= if @memberships != [] do %>
-          <div class="space-y-2 mb-4">
-            <%= for m <- @memberships do %>
-              <div class="flex items-center justify-between rounded-lg border border-gray-100 px-4 py-3">
-                <span class="text-sm text-gray-700"><%= m.user.email %></span>
-                <button
-                  phx-click="remove_member"
-                  phx-value-id={m.id}
-                  data-confirm={"Remove #{m.user.email} from this project?"}
-                  class="text-xs text-red-400 hover:text-red-600"
-                >
-                  Remove
-                </button>
-              </div>
-            <% end %>
+        <div class="space-y-2 mb-4">
+          <%!-- Owner row (always shown, cannot be removed) --%>
+          <div class="flex items-center justify-between rounded-lg border border-gray-100 px-4 py-3">
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-gray-700"><%= @owner.email %></span>
+              <span class="text-xs text-gray-400 bg-gray-100 rounded-full px-2 py-0.5">owner</span>
+            </div>
           </div>
-        <% end %>
+          <%!-- Additional members --%>
+          <%= for m <- @memberships do %>
+            <div class="flex items-center justify-between rounded-lg border border-gray-100 px-4 py-3">
+              <span class="text-sm text-gray-700"><%= m.user.email %></span>
+              <button
+                phx-click="remove_member"
+                phx-value-id={m.id}
+                data-confirm={"Remove #{m.user.email} from this project?"}
+                class="text-xs text-red-400 hover:text-red-600"
+              >
+                Remove
+              </button>
+            </div>
+          <% end %>
+        </div>
 
         <form phx-submit="invite_member" class="flex gap-2">
           <input

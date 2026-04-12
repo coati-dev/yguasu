@@ -5,7 +5,7 @@ defmodule JaguaWeb.Live.SettingsLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, socket}
+    {:ok, assign(socket, page_title: "Account settings")}
   end
 
   @impl true

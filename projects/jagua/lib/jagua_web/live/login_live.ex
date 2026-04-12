@@ -7,7 +7,7 @@ defmodule JaguaWeb.Live.LoginLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, form: to_form(%{"email" => ""}), sent: false)}
+    {:ok, assign(socket, form: to_form(%{"email" => ""}), sent: false, page_title: "Sign in")}
   end
 
   @impl true
