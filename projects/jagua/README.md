@@ -131,8 +131,3 @@ Visit [localhost:4000](http://localhost:4000).
 - [PostgreSQL](https://www.postgresql.org)
 - [Tailwind CSS](https://tailwindcss.com)
 
----
-
-## License
-
-MIT
