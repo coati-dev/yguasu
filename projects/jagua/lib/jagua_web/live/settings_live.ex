@@ -23,7 +23,7 @@ defmodule JaguaWeb.Live.SettingsLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="max-w-xl mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto px-4 py-8">
       <h1 class="text-2xl font-bold text-gray-900 mb-8">Account settings</h1>
 
       <div class="bg-white rounded-xl border border-gray-200 p-6 mb-4">
