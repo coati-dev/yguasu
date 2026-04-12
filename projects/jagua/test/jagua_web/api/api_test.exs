@@ -1,5 +1,8 @@
 defmodule JaguaWeb.Api.ApiTest do
-  # async: false because ApiAuth spawns a Task.start for touch_key which needs shared sandbox
+  # async: false — ApiAuth, CheckInController, and Dispatcher spawn Task.start tasks that do
+  # DB work. Sandbox.allow/3 is called in each task so they inherit the test connection,
+  # but allow/3 is a no-op in :shared mode, so async: false (shared: true) is still required
+  # to give all spawned processes access to the same sandbox connection.
   use JaguaWeb.ConnCase, async: false
 
   import Jagua.Factory
