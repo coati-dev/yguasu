@@ -6,8 +6,10 @@
       <a href={~p"/"}><img src={~p"/images/wolf-head.png"} alt="Jagua" class="w-20 h-20" /></a>
     </div>
     <div class="flex items-center justify-end gap-4 text-sm text-gray-500">
-      <a href={~p"/settings"} class="hover:text-gray-900 transition-colors"><%= @current_user.email %></a>
-      <.link href={~p"/auth/logout"} method="delete" class="hover:text-gray-900 transition-colors">Sign out</.link>
+      <%= if @current_user do %>
+        <a href={~p"/settings"} class="hover:text-gray-900 transition-colors"><%= @current_user.email %></a>
+        <.link href={~p"/auth/logout"} method="delete" class="hover:text-gray-900 transition-colors">Sign out</.link>
+      <% end %>
     </div>
   </header>
   {@inner_content}
