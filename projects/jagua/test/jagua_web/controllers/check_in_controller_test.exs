@@ -7,7 +7,7 @@ defmodule JaguaWeb.CheckInControllerTest do
     test "returns 200 for valid token", %{conn: conn} do
       sentinel = create_sentinel()
       conn = get(conn, ~p"/in/#{sentinel.token}")
-      assert text_response(conn, 200) =~ "Got it"
+      assert text_response(conn, 200) =~ "Jagua got it"
     end
 
     test "returns 404 for unknown token", %{conn: conn} do
@@ -18,13 +18,13 @@ defmodule JaguaWeb.CheckInControllerTest do
     test "accepts optional message param", %{conn: conn} do
       sentinel = create_sentinel()
       conn = get(conn, ~p"/in/#{sentinel.token}?m=completed+ok")
-      assert text_response(conn, 200) =~ "Got it"
+      assert text_response(conn, 200) =~ "Jagua got it"
     end
 
     test "accepts optional exit code param", %{conn: conn} do
       sentinel = create_sentinel()
       conn = get(conn, ~p"/in/#{sentinel.token}?s=0")
-      assert text_response(conn, 200) =~ "Got it"
+      assert text_response(conn, 200) =~ "Jagua got it"
     end
 
     test "non-zero exit code marks sentinel as errored", %{conn: conn} do
@@ -78,7 +78,7 @@ defmodule JaguaWeb.CheckInControllerTest do
     test "also accepts POST", %{conn: conn} do
       sentinel = create_sentinel()
       conn = post(conn, ~p"/in/#{sentinel.token}")
-      assert text_response(conn, 200) =~ "Got it"
+      assert text_response(conn, 200) =~ "Jagua got it"
     end
   end
 end

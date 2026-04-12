@@ -1,7 +1,12 @@
-<main class="min-h-screen bg-gray-50">
+<div class="min-h-screen bg-white text-gray-900">
   <.flash_group flash={@flash} />
-  <div class="flex justify-center pt-8 pb-2">
+  <header class="max-w-4xl mx-auto px-6 py-6 flex items-center justify-between">
+    <a href={~p"/dashboard"} class="text-lg font-bold tracking-tight text-gray-900">Jagua</a>
     <a href={~p"/"}><img src={~p"/images/wolf-head.png"} alt="Jagua" class="w-20 h-20" /></a>
-  </div>
+    <div class="flex items-center gap-4 text-sm text-gray-500">
+      <a href={~p"/settings"} class="hover:text-gray-900 transition-colors"><%= @current_user.email %></a>
+      <.link href={~p"/auth/logout"} method="delete" class="hover:text-gray-900 transition-colors">Sign out</.link>
+    </div>
+  </header>
   {@inner_content}
-</main>
+</div>

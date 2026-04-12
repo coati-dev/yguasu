@@ -221,6 +221,9 @@ defmodule JaguaWeb.CoreComponents do
       <.button phx-click="go" class="ml-2">Send!</.button>
   """
   attr :type, :string, default: nil
+  attr :variant, :atom,
+    values: [:default, :secondary, :outline, :ghost, :destructive],
+    default: :default
   attr :class, :string, default: nil
   attr :rest, :global, include: ~w(disabled form name value)
 
@@ -231,14 +234,102 @@ defmodule JaguaWeb.CoreComponents do
     <button
       type={@type}
       class={[
-        "phx-submit-loading:opacity-75 rounded-lg bg-zinc-900 hover:bg-zinc-700 py-2 px-3",
-        "text-sm font-semibold leading-6 text-white active:text-white/80",
+        "phx-submit-loading:opacity-75 rounded-lg py-2 px-3 text-sm font-semibold leading-6 transition-colors",
+        @variant == :default && "bg-gray-900 text-white hover:bg-gray-700 active:text-white/80",
+        @variant == :secondary && "bg-gray-100 text-gray-900 hover:bg-gray-200",
+        @variant == :outline && "border border-gray-300 bg-transparent text-gray-700 hover:bg-gray-50",
+        @variant == :ghost && "bg-transparent text-gray-500 hover:text-gray-900 hover:bg-gray-100",
+        @variant == :destructive && "bg-red-600 text-white hover:bg-red-700",
         @class
       ]}
       {@rest}
     >
       {render_slot(@inner_block)}
     </button>
+    """
+  end
+
+  @doc """
+  Renders a badge pill.
+
+  ## Examples
+
+      <.badge>Default</.badge>
+      <.badge variant={:success}>Healthy</.badge>
+  """
+  attr :variant, :atom,
+    values: [:default, :secondary, :success, :error, :warning, :orange],
+    default: :default
+  attr :class, :string, default: nil
+  slot :inner_block, required: true
+
+  def badge(assigns) do
+    ~H"""
+    <span class={[
+      "inline-flex items-center rounded-full text-xs font-medium px-2.5 py-0.5",
+      @variant == :default && "bg-gray-900 text-white",
+      @variant == :secondary && "bg-gray-100 text-gray-500",
+      @variant == :success && "bg-green-100 text-green-700",
+      @variant == :error && "bg-red-100 text-red-700",
+      @variant == :warning && "bg-yellow-100 text-yellow-700",
+      @variant == :orange && "bg-orange-100 text-orange-700",
+      @class
+    ]}>
+      {render_slot(@inner_block)}
+    </span>
+    """
+  end
+
+  @doc """
+  Renders a sentinel status badge.
+
+  ## Examples
+
+      <.status_badge status={:healthy} />
+      <.status_badge status={:failed} />
+  """
+  attr :status, :atom, required: true
+
+  def status_badge(assigns) do
+    {label, variant} =
+      case assigns.status do
+        :healthy -> {"Healthy", :success}
+        :failed -> {"Failed", :error}
+        :errored -> {"Errored", :orange}
+        :paused -> {"Paused", :warning}
+        :pending -> {"Pending", :secondary}
+      end
+
+    assigns = assign(assigns, label: label, variant: variant)
+
+    ~H"""
+    <.badge variant={@variant}>{@label}</.badge>
+    """
+  end
+
+  @doc """
+  Renders a small sentinel status dot indicator.
+
+  ## Examples
+
+      <.status_dot status={:healthy} />
+  """
+  attr :status, :atom, required: true
+
+  def status_dot(assigns) do
+    color =
+      case assigns.status do
+        :healthy -> "bg-green-400"
+        :failed -> "bg-red-500"
+        :errored -> "bg-orange-400"
+        :paused -> "bg-yellow-400"
+        :pending -> "bg-gray-300"
+      end
+
+    assigns = assign(assigns, color: color)
+
+    ~H"""
+    <span class={["w-3 h-3 rounded-full flex-shrink-0", @color]} />
     """
   end
 
