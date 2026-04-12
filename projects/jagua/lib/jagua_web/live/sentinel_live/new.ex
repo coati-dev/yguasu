@@ -93,7 +93,7 @@ defmodule JaguaWeb.Live.SentinelLive.New do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="max-w-lg mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto px-4 py-8">
       <.link navigate={~p"/projects/#{@project.slug}"}
         class="text-sm text-gray-400 hover:text-gray-600 mb-6 inline-block">
         ← <%= @project.name %>
