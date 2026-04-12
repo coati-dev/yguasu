@@ -48,8 +48,7 @@ defmodule JaguaWeb.Live.StatusPageLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gray-50">
-      <div class="max-w-2xl mx-auto px-4 py-12">
+    <div class="max-w-2xl mx-auto px-4 py-12">
         <%= if @project do %>
           <div class="mb-10 text-center">
             <h1 class="text-2xl font-bold text-gray-900"><%= @project.name %></h1>
@@ -91,7 +90,6 @@ defmodule JaguaWeb.Live.StatusPageLive do
             <p class="text-gray-400">This status page is not available.</p>
           </div>
         <% end %>
-      </div>
     </div>
     """
   end

@@ -27,14 +27,9 @@ defmodule JaguaWeb.Live.LoginLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div class="flex-1 flex items-center justify-center px-4 py-8">
       <div class="w-full max-w-sm">
-        <div class="text-center mb-8">
-          <h1 class="text-2xl font-bold text-gray-900">Jagua</h1>
-          <p class="text-sm text-gray-500 mt-1">Cron job monitoring</p>
-        </div>
-
-        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
+        <div class="rounded-xl border border-gray-200 shadow-sm p-8">
           <%= if @sent do %>
             <div class="text-center">
               <div class="text-3xl mb-4">📬</div>
@@ -52,7 +47,8 @@ defmodule JaguaWeb.Live.LoginLive do
               </button>
             </div>
           <% else %>
-            <h2 class="text-lg font-semibold text-gray-900 mb-6">Sign in</h2>
+            <h2 class="text-lg font-semibold text-gray-900 mb-1">Sign in</h2>
+            <p class="text-sm text-gray-500 mb-6">No account? Just sign in to register.</p>
             <.form for={@form} phx-submit="submit">
               <div class="mb-4">
                 <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
