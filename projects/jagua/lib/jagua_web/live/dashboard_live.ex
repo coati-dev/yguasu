@@ -35,20 +35,10 @@ defmodule JaguaWeb.Live.DashboardLive do
     <div class="max-w-4xl mx-auto px-4 py-8">
       <div class="flex items-center justify-between mb-8">
         <h1 class="text-2xl font-bold text-gray-900">Projects</h1>
-        <div class="flex items-center gap-3">
-          <.link navigate={~p"/settings"}
-            class="text-sm text-gray-400 hover:text-gray-600">
-            <%= @current_user.email %>
-          </.link>
-          <.link href={~p"/auth/logout"} method="delete"
-            class="text-sm text-gray-400 hover:text-gray-600">
-            Sign out
-          </.link>
-          <.link navigate={~p"/projects/new"}
-            class="bg-gray-900 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-gray-700 transition-colors">
-            New project
-          </.link>
-        </div>
+        <.link navigate={~p"/projects/new"}
+          class="bg-gray-900 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-gray-700 transition-colors">
+          New project
+        </.link>
       </div>
 
       <%= if @projects == [] do %>
@@ -91,26 +81,10 @@ defmodule JaguaWeb.Live.DashboardLive do
     )
 
     ~H"""
-    <%= if @failed > 0 do %>
-      <span class="inline-flex items-center rounded-full bg-red-100 text-red-700 text-xs font-medium px-2 py-0.5">
-        <%= @failed %> failing
-      </span>
-    <% end %>
-    <%= if @healthy > 0 do %>
-      <span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5">
-        <%= @healthy %> healthy
-      </span>
-    <% end %>
-    <%= if @pending > 0 do %>
-      <span class="inline-flex items-center rounded-full bg-gray-100 text-gray-500 text-xs font-medium px-2 py-0.5">
-        <%= @pending %> pending
-      </span>
-    <% end %>
-    <%= if @paused > 0 do %>
-      <span class="inline-flex items-center rounded-full bg-yellow-100 text-yellow-700 text-xs font-medium px-2 py-0.5">
-        <%= @paused %> paused
-      </span>
-    <% end %>
+    <.badge :if={@failed > 0} variant={:error}><%= @failed %> failing</.badge>
+    <.badge :if={@healthy > 0} variant={:success}><%= @healthy %> healthy</.badge>
+    <.badge :if={@pending > 0} variant={:secondary}><%= @pending %> pending</.badge>
+    <.badge :if={@paused > 0} variant={:warning}><%= @paused %> paused</.badge>
     """
   end
 end

@@ -490,41 +490,8 @@ defmodule JaguaWeb.Live.SentinelLive.Show do
     """
   end
 
-  defp status_dot(assigns) do
-    color =
-      case assigns.status do
-        :healthy -> "bg-green-400"
-        :failed -> "bg-red-500"
-        :errored -> "bg-orange-400"
-        :paused -> "bg-yellow-400"
-        :pending -> "bg-gray-300"
-      end
-
-    assigns = assign(assigns, color: color)
-    ~H(<span class={"w-3 h-3 rounded-full flex-shrink-0 #{@color}"} />)
-  end
-
   defp atomize_keys(map) do
     Map.new(map, fn {k, v} -> {String.to_existing_atom(k), v} end)
-  end
-
-  defp status_badge(assigns) do
-    {label, classes} =
-      case assigns.status do
-        :healthy -> {"Healthy", "bg-green-100 text-green-700"}
-        :failed -> {"Failed", "bg-red-100 text-red-700"}
-        :errored -> {"Errored", "bg-orange-100 text-orange-700"}
-        :paused -> {"Paused", "bg-yellow-100 text-yellow-700"}
-        :pending -> {"Pending", "bg-gray-100 text-gray-500"}
-      end
-
-    assigns = assign(assigns, label: label, classes: classes)
-
-    ~H"""
-    <span class={"inline-flex items-center rounded-full text-xs font-medium px-2 py-0.5 #{@classes}"}>
-      <%= @label %>
-    </span>
-    """
   end
 
 end
