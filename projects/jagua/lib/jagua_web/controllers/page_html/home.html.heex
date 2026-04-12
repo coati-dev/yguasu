@@ -3,20 +3,24 @@
 <div class="min-h-screen bg-white text-gray-900">
 
   <%!-- Nav --%>
-  <header class="max-w-4xl mx-auto px-6 py-6 flex items-center justify-between">
+  <header class="max-w-4xl mx-auto px-6 py-6 grid grid-cols-3 items-center">
     <span class="text-lg font-bold tracking-tight text-gray-900">Jagua</span>
-    <a href={~p"/"}><img src={~p"/images/wolf-head.png"} alt="Jagua" class="w-20 h-20" /></a>
-    <%= if @current_user do %>
-      <a href={~p"/dashboard"}
-        class="text-sm text-gray-500 hover:text-gray-900 transition-colors">
-        Dashboard →
-      </a>
-    <% else %>
-      <a href={~p"/login"}
-        class="text-sm text-gray-500 hover:text-gray-900 transition-colors">
-        Sign in →
-      </a>
-    <% end %>
+    <div class="flex justify-center">
+      <a href={~p"/"}><img src={~p"/images/wolf-head.png"} alt="Jagua" class="w-20 h-20" /></a>
+    </div>
+    <div class="flex justify-end">
+      <%= if @current_user do %>
+        <a href={~p"/dashboard"}
+          class="text-sm text-gray-500 hover:text-gray-900 transition-colors">
+          Dashboard →
+        </a>
+      <% else %>
+        <a href={~p"/login"}
+          class="text-sm text-gray-500 hover:text-gray-900 transition-colors">
+          Sign in →
+        </a>
+      <% end %>
+    </div>
   </header>
 
   <%!-- Hero --%>
